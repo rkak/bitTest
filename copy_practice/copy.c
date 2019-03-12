@@ -5,7 +5,7 @@
 #include <unistd.h> // read(), write(), open(), close()
 #define BUF_SIZE 1024
 
-// #define DEBUG
+#define DEBUG
 
 int main(int argc, char *argv[]){
 	int fd1, fd2, len;
@@ -18,7 +18,17 @@ int main(int argc, char *argv[]){
 #endif
 
 	fd1 = open(argv[1], O_RDONLY); // Open read file
-	fd2 = open(argv[2], O_WRONLY | O_CREAT); // Open write file
+	// You should put this error code at first time
+	if(fd1 < 0)
+		printf("%s open error\n", argv[1]);
+	fd2 = open(argv[2], O_WRONLY | O_CREAT, 0644); // Open write file
+	if(fd2 < 0)
+		printf("%s open error\n", argv[2]);
+	
+#ifdef DEBUG
+	printf("fd1 : %d\n", fd1);
+	printf("fd2 : %d\n", fd2);
+#endif
 
 	// read & write
 	while((len = read(fd1, buf, sizeof(buf))) > 0)
