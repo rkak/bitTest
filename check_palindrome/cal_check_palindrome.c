@@ -4,13 +4,12 @@
 // #define DEBUG
 
 int swap(char *a, char *b);
+int palindrome(char * str, int start, int end);
 
 int main(int argc, char *argv[]){
 	char word[52];	
 	int len;
 	int start, end;
-	int result_cnt = 0;
-	int once_ins = 0;	// if once instrument is used once, it set 1.
 
 	memset(word, 0, sizeof(word));
 
@@ -35,21 +34,39 @@ int main(int argc, char *argv[]){
 #endif
 
 	if(len < 1 + 1){	// The word has a digit
-			result_cnt = 0;
-			printf("%d\n", result_cnt);
+			printf("%d\n", 0);
 			return 0;
 	}
 	start = 0;		// start index end = len - 1;	// end index
 	end = len - 1;
 
+	int result = palindrome(word, start, end);
+	int min = len - 1;
+
+	// need reconstructing
+	for(int i=0; i < len/2; i++){
+			for(int j=len-1; j>len/2; j--){
+					if(min > palindrome(word, i, j) + i)
+							min = palindrome(word, i, j) + i;
+			}
+	}
+	printf("%d\n", result);
+	printf("min : %d\n", min);
+}
+
+// return num -> result_count
+// return -1 -> no
+int palindrome(char * str, int start, int end){
+	int result_cnt = 0;
+	int once_ins = 0;	// if once instrument is used once, it set 1.
 	while(start < end){
-		if(word[start] != word[end]){
-				if(start != end - 1 &&word[start] == word[end-1] && once_ins == 0){
-						swap(&word[end], &word[end-1]);
+		if(str[start] != str[end]){
+				if(start != end - 1 &&str[start] == str[end-1] && once_ins == 0){
+						swap(&str[end], &str[end-1]);
 						once_ins = 1;
 				}
 				else{
-						word[end] = word[start];
+						str[end] = str[start];
 				}
 				result_cnt++;
 		}
@@ -57,13 +74,13 @@ int main(int argc, char *argv[]){
 		end--;
 	}
 
-	printf("%d\n", result_cnt);
-
 #ifdef DEBUG
 	printf("%s\n", word);
 #endif
 
-	return 0;
+//	return 0;
+	return result_cnt;
+
 }
 
 int swap(char *a, char *b){
