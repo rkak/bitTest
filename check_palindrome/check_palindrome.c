@@ -21,7 +21,7 @@ int main(void){
 	printf("len : %d\n", len);
 #endif
 
-	if(len < 1 + 2){
+	if(len < 1 + 2){	// word have a enter
 			printf("OK\n");
 			return 0;
 	}
@@ -30,7 +30,7 @@ int main(void){
 
 	while(start < end){
 		if(word[start] != word[end]){
-			printf("No palindrome word\n");
+			printf("No palindrome\n");
 			return 0;
 		}
 		start++;
