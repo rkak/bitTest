@@ -1,0 +1,10 @@
+all:new_myls
+
+new_myls:new_myls.o
+	gcc -o $@ $^
+
+new_myls.o:new_myls.c
+	gcc -c $?
+
+clean:
+	rm -rf new_myls new_myls*.o
