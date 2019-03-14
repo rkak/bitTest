@@ -39,8 +39,8 @@ int compare_l(const void * file1, const void *file2){
 		char temp_str[100];
 		long temp_l;
 
-		sscanf((char *)file1, "\n%s %3ld %s %s %5ld %s %s %s %s", temp_str, &temp_l, temp_str, temp_str, &temp_l, temp_str, temp_str, temp_str, filename1);
-		sscanf((char *)file2, "\n%s %3ld %s %s %5ld %s %s %s %s", temp_str, &temp_l, temp_str, temp_str, &temp_l, temp_str, temp_str, temp_str, filename2);
+		sscanf((char *)file1, "\n%s %ld %s %s %ld %s %s %s %s", temp_str, &temp_l, temp_str, temp_str, &temp_l, temp_str, temp_str, temp_str, filename1);
+		sscanf((char *)file2, "\n%s %ld %s %s %ld %s %s %s %s", temp_str, &temp_l, temp_str, temp_str, &temp_l, temp_str, temp_str, temp_str, filename2);
 
 		if(strcmp(filename1, filename2) < 0)
 				return -1;
@@ -72,18 +72,15 @@ int main(int argc, char *argv[]){
 		char option[20] = { 0 };
 		int is_there_option = 0;
 
-		char uowner[10];
-		char gowner[10];
+		char uowner[10];	// user owner name
+		char gowner[10];	// group owner name
+		struct passwd *upw;	// this is for uid
+		struct group *gentry;	// this is for gid
 
-		struct passwd *upw;
-		struct group *gentry;
-
-		long size;
-
-		char linkbuf[50];
+		char linkbuf[50];	// for symbolic link buffer
 
 		// ---- about time ---- //
-		struct tm * ctm;	// changed tm
+		struct tm * mtm;	// changed tm
 		char tbuf[TIME_BUF_SIZE];
 
 
@@ -91,8 +88,9 @@ int main(int argc, char *argv[]){
 		char fileinfo[255][255];
 		int index;
 
-		int option_l = 0;
-		int option_a = 1;
+		
+		int option_l = 0; // if there is 'l' in option, it is 1
+		int option_a = 1; // if there is 'a' in option, it is 1
 
 		memset(option, 0, sizeof(option));
 
@@ -105,20 +103,21 @@ int main(int argc, char *argv[]){
 		// if(argc < 2) exit(1);
 		if(argc < 2){
 				strcpy(targetname, ".");
-		}else if(argc > 2){
+		}else if(argc == 2){
+				strcpy(targetname, ".");
+				if(argv[1][0] == '-'){
+						strcpy(option, argv[1] + 1);
+						is_there_option = 1;
+				}
+		}else{
 				strcpy(targetname, argv[1]);
 				if(argv[1][0] == '-'){
 						strcpy(option, argv[1] + 1);
 						is_there_option = 1;
 				}
 				strcpy(targetname, argv[2]);
-		}else{
-				strcpy(targetname, ".");
-				if(argv[1][0] == '-'){
-						strcpy(option, argv[1] + 1);
-						is_there_option = 1;
-				}
 		}
+
 #ifdef DEBUG
 		printf("option : %s\n", option);
 #endif
@@ -136,6 +135,7 @@ int main(int argc, char *argv[]){
 
 //		printf("Lists of Directory(%s):\n", targetname);
 
+		// if there is 'l' option, print total	
 		if(strchr(option, 'l') != NULL)
 				sprintf(fileinfo[index++], "total : %ld", statbuf.st_blksize / 1024);
 
@@ -152,27 +152,35 @@ int main(int argc, char *argv[]){
 					printf("path name : %s\n", pathname);
 #endif
 					option_a = 0;
-					if(pathname[2] == '.') continue;
+					if(dent->d_name[0] == '.') continue;
 			}
 			if(strchr(option, 'l') != NULL){
 #ifdef DEBUG
 					printf("l in option\n");
 #endif
 					option_l = 1;
+
+					// set permission string
 					access_perm(perm, statbuf.st_mode);
 
-					ctm = localtime(&statbuf.st_ctime);
-					upw = getpwuid(statbuf.st_uid);
+					// set time
+					mtm = localtime(&statbuf.st_mtime);
+					strftime(tbuf, sizeof(tbuf), "%m월 %d %H:%M", mtm);
 
+					// set user name, group name
+					upw = getpwuid(statbuf.st_uid);
 					gentry = getgrgid(statbuf.st_gid);
 					sprintf(uowner, "%s", upw->pw_name);
 					sprintf(gowner, "%s", gentry->gr_name);
-					strftime(tbuf, sizeof(tbuf), "%m %d %H:%M", ctm);
-					sprintf(fileinfo[index], "\n%s %3ld %s %s %5ld %s ", perm, statbuf.st_nlink, uowner, gowner, statbuf.st_size, tbuf);
+					
+					// print in fileinfo[index] of perm, hard link, user name, group name, buf size, time data
+					sprintf(fileinfo[index], "\n%s %3ld %8s %8s %5ld %s ", perm, statbuf.st_nlink, uowner, gowner, statbuf.st_size, tbuf);
 			}
 			
 			strcat(fileinfo[index], dent->d_name);
 			strcat(fileinfo[index], " ");
+
+			// when the file is a symbolic link
 			if(perm[0] == 'l'){
 					int len = readlink(pathname, linkbuf, 50);
 					linkbuf[len] = '\0';
