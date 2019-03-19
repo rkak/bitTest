@@ -5,6 +5,11 @@
 #include <stdlib.h>
 #include <wait.h>
 
+// it needs a sync
+// after a sync signal, then practice on child proc.
+// use a signal for sync
+// after you confirm the structure of program, you can doc coding.
+
 void pr_exit(int * status){
 
 }

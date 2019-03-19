@@ -15,6 +15,8 @@ int main(int argc, char *argv[])
 		// 해당 pid로 signal을 전송
 		s = kill(atol(argv[1]), sig);
 
+		printf("DTD\n");
+
 		// signal > 0
 		if (sig != 0)
 		{
