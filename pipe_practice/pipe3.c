@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
 
 int main(void){
 		int data_processed;
@@ -11,25 +11,26 @@ int main(void){
 		pid_t fork_result;
 		memset(buffer, '\0', sizeof(buffer));
 
-		// create file_pipes. [0] : input, [1] : output
+		// create pipe 
 		if(pipe(file_pipes) == 0){
 				fork_result = fork();
+
 				if(fork_result == -1){
 						fprintf(stderr, "Fork failure");
 						exit(EXIT_FAILURE);
 				}
-				// child process. copy all fd.
+				// child process
 				if(fork_result == 0){
-						// BUFSIZ = 8192
-						// until read the data, it've been blocked
-						data_processed = read(file_pipes[0], buffer, BUFSIZ);
-						printf("Read %d bytes : %s\n", data_processed, buffer);
-						exit(EXIT_SUCCESS);
+						// file_pipes[0] : input to buffer(string)
+						sprintf(buffer, "%d", file_pipes[0]);
+						// execute pipe4 and send a arg, buffer(string)
+						execl("pipe4", "pipe4", buffer, (char *)0);
+						exit(EXIT_FAILURE);
 				}
 				else{
 						// send some_data using file_pipes[1]
 						data_processed = write(file_pipes[1], some_data, strlen(some_data));
-						printf("Wrote %d bytes\n", data_processed);
+						printf("%d - wrote %d bytes\n", getpid(), data_processed);
 				}
 		}
 		exit(EXIT_SUCCESS);
