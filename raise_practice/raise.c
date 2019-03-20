@@ -16,6 +16,7 @@ int main(void){
 				count++;
 				printf("Hello Wolrd\n");
 				if(count == 3){
+						// send a signal(here, SIGINT) to processorself. if it has threads, they can be received that signal
 						raise(SIGINT);
 						count = 0;
 				}
